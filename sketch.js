@@ -1,7 +1,6 @@
 /*
  * Todos: 
  * - Create image cycle 
- * - Crop all images to 1920*1080 
  * - Save drawings to JSON file
  *   - Associate Drawings to Images 
  * - Create "see old drawings" mode 
@@ -43,7 +42,6 @@ function preload() {
 
   img = loadImage("/assets/rock.jpg");
   //img = loadImage("/assets/tree.jpeg");
-
 }
 
 function setup() {
@@ -75,6 +73,10 @@ function setup() {
 }
 
 function draw() {
+  drawPrompt();
+}
+
+function drawPrompt() {
   push();
   textSize(50);
   strokeWeight(3);
@@ -190,11 +192,8 @@ function clearCanvas() {
 function submitDrawing() {
   console.log("Submitting Drawing");
   if (strokeList.length > 0) {
-    let drawingObj = {
-      colorStr: colorList[currentColorIndex],
-      strokes: strokeList
-    };
-    drawingList.push(drawingObj);
+    let d = new Drawing(colorList[currentColorIndex], strokeList);
+    drawingList.push(d);
     strokeList = [];
     resetBackground();
     changeColor();
