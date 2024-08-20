@@ -1,19 +1,22 @@
-/*
- * Todos: 
- * - Create image cycle 
- * - Save drawings to JSON file
- *   - Associate Drawings to Images 
- * - Create "see old drawings" mode 
- *   - Cycle through drawings instead of seeing all at once 
-*/
-
 const imgPathList = ["/assets/p4.jpg", "/assets/p6.jpg", "/assets/p8.jpg"]
-const colorList = ["red", "blue", "violet", "yellow"];
-const sWeight = 10;
-const backgroundColor = 0;
 let img;
 let buttonHeight;
 
+/*--------------------- Drawings variables -------------------------*/
+/*
+ * Drawings consist of an image index, color, and list of strokes 
+ * strokeList holds the strokes in the current drawing 
+ * currentStroke consists of a list of points 
+ */
+let drawingList = [];
+let strokeList = [];
+let currentStroke = [];
+
+const setStrokeWeight = 10;
+const colorList = ["red", "blue", "violet", "yellow"];
+let currentColorIndex = 0;
+
+/*--------------------- Classes -------------------------*/
 /* 
  * class Drawing 
  * {String} drawing.colorStr
@@ -26,22 +29,9 @@ class Drawing {
   }
 }
 
-/* Array of drawings
- * {Drawing} drawing
- */
-let drawingList = [];
-
-// Array of individual strokes: each stroke consists of an array of points
-let strokeList = [];
-let currentStroke = [];
-let currentColorIndex = 0;
-
+/*--------------------- Setup -------------------------*/
 function preload() {
-  // img = loadImage("/assets/p_i1.jpg");
-  //img = loadImage("/assets/p4.jpg");
-
-  img = loadImage("/assets/rock.jpg");
-  //img = loadImage("/assets/tree.jpeg");
+  img = loadImage("/assets/p1.jpg");
 }
 
 function setup() {
@@ -49,7 +39,6 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   buttonHeight = window.innerHeight - 130;
 
-  background(backgroundColor);
   resetBackground();
 
   let submitButton = createButton("submit");
@@ -68,7 +57,7 @@ function setup() {
   clearButton.position(520, buttonHeight);
   clearButton.mousePressed(clearCanvas);
   
-  strokeWeight(sWeight);
+  strokeWeight(setStrokeWeight);
   stroke(colorList[currentColorIndex]);
 }
 
