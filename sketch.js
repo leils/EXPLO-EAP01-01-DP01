@@ -71,7 +71,7 @@ function setup() {
   createMetaTag();
   createCanvas(window.innerWidth, window.innerHeight);
   buttonHeight = window.innerHeight - 130;
-  promptTextSize = Math.floor(window.innerHeight/18);
+  promptTextSize = Math.floor(window.innerWidth/21);
 
   resetBackground();
 
