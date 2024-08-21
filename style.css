@@ -15,4 +15,5 @@ button {
   padding: 18px;
   color: black;
   background:yellow;
+  user-select: none;
 }
