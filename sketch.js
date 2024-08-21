@@ -1,10 +1,10 @@
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
-  "/assets/p1.jpg", 
-  "/assets/p2.jpg", 
-  "/assets/p3.jpg",
-  "/assets/p4.jpg"
+  "./assets/p1.jpg", 
+  "./assets/p2.jpg", 
+  "./assets/p3.jpg",
+  "./assets/p4.jpg"
 ]
 let loadedImages = [];
 let currentImageIndex = 0;
@@ -50,6 +50,7 @@ function preload() {
   fetchJSONData();
 }
 
+// Adapted from https://www.geeksforgeeks.org/read-json-file-using-javascript/
 function fetchJSONData() {
   fetch("./drawings.json")
       .then((res) => {
@@ -141,6 +142,9 @@ function drawAllStrokes(slist) {
   }
 }
 
+/* 
+ * TODO: handle the on/off change also when moving to next image
+*/
 function handleShowDrawingButton() {
   if (!showingOldDrawings) {
     seeAllDrawingsButton.style("background-color","green");
@@ -243,6 +247,8 @@ function submitDrawing() {
   }
 }
 
+// browser can't actually save to a JSON file 
+// instead it creates a downloadable JSON file 
 function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
 }
