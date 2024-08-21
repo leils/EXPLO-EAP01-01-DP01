@@ -1,10 +1,10 @@
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
-  "./assets/p1.jpg", 
-  "./assets/p2.jpg", 
-  "./assets/p3.jpg",
-  "./assets/p4.jpg"
+  "assets/p1.jpg", 
+  "assets/p2.jpg", 
+  "assets/p3.jpg",
+  "assets/p4.jpg"
 ]
 let loadedImages = [];
 let currentImageIndex = 0;
