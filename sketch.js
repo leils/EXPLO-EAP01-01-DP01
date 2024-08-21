@@ -9,6 +9,7 @@ const imgPathList = [
 let loadedImages = [];
 let currentImageIndex = 0;
 let buttonHeight;
+let promptTextSize = 50;
 
 /*--------------------- Drawings variables -------------------------*/
 /*
@@ -70,6 +71,7 @@ function setup() {
   createMetaTag();
   createCanvas(window.innerWidth, window.innerHeight);
   buttonHeight = window.innerHeight - 130;
+  promptTextSize = Math.floor(window.innerHeight/18);
 
   resetBackground();
 
@@ -103,7 +105,7 @@ function draw() {
 
 function drawPrompt() {
   push();
-  textSize(50);
+  textSize(promptTextSize);
   strokeWeight(3);
   stroke('black');
   fill('yellow');
