@@ -1,5 +1,11 @@
-const imgPathList = ["/assets/p4.jpg", "/assets/p6.jpg", "/assets/p8.jpg"]
-let img;
+/*--------------------- Image variables -------------------------*/
+const imgPathList = [
+  "/assets/p1.jpg", 
+  "/assets/p2.jpg", 
+  "/assets/p3.jpg"
+]
+let loadedImages = [];
+let currentImageIndex = 0;
 let buttonHeight;
 
 /*--------------------- Drawings variables -------------------------*/
@@ -23,7 +29,8 @@ let currentColorIndex = 0;
  * {Array.Array{x:number, y:number}} drawing.strokes
 */ 
 class Drawing {
-  constructor(colorStr, strokes) {
+  constructor(imgIndex, colorStr, strokes) {
+    this.imgIndex = imgIndex;
     this.colorStr = colorStr;
     this.strokes = strokes;
   }
@@ -31,7 +38,9 @@ class Drawing {
 
 /*--------------------- Setup -------------------------*/
 function preload() {
-  img = loadImage("/assets/p1.jpg");
+  for (path of imgPathList) {
+    loadedImages.push(loadImage(path));
+  }
 }
 
 function setup() {
@@ -77,7 +86,7 @@ function drawPrompt() {
 
 // ------------------- Draw Functions ----------------//
 function resetBackground() {
-  image(img, 0, 0, window.innerWidth, window.innerHeight);
+  image(loadedImages[currentImageIndex], 0, 0, window.innerWidth, window.innerHeight);
 }
 
 /**
@@ -107,12 +116,20 @@ function drawAllStrokes(slist) {
 }
 
 function showAllDrawings() {
-  for (var drawing of drawingList) {
+  let relevantDrawings = drawingList.filter(d => d.imgIndex == currentImageIndex); 
+  console.log(relevantDrawings.length);
+  for (var drawing of relevantDrawings) {
     push();
     stroke(drawing.colorStr);
     drawAllStrokes(drawing.strokes);
     pop();
   }
+}
+
+function nextImage() {
+  // iterate to next image
+  currentImageIndex = currentImageIndex >= loadedImages.length - 1 ? 0 : currentImageIndex + 1;
+  clearCanvas(); // also remove the current drawings 
 }
 
 function changeColor() {
@@ -181,7 +198,7 @@ function clearCanvas() {
 function submitDrawing() {
   console.log("Submitting Drawing");
   if (strokeList.length > 0) {
-    let d = new Drawing(colorList[currentColorIndex], strokeList);
+    let d = new Drawing(currentImageIndex, colorList[currentColorIndex], strokeList);
     drawingList.push(d);
     strokeList = [];
     resetBackground();
@@ -204,6 +221,8 @@ function keyPressed() {
     resetBackground();
   } else if (key == "a") {
     showAllDrawings();
+  } else if (key == "n") {
+    nextImage();
   } else if (key == "1") {
     saveDrawingsToJson();
   }
