@@ -16,6 +16,7 @@ let buttonHeight;
  * strokeList holds the strokes in the current drawing 
  * currentStroke consists of a list of points 
  */
+const drawingStorePath = "drawings.json";
 let drawingList = [];
 let strokeList = [];
 let currentStroke = [];
@@ -45,6 +46,23 @@ function preload() {
   for (path of imgPathList) {
     loadedImages.push(loadImage(path));
   }
+
+  fetchJSONData();
+}
+
+function fetchJSONData() {
+  fetch("./drawings.json")
+      .then((res) => {
+          if (!res.ok) {
+              throw new Error
+                  (`HTTP error! Status: ${res.status}`);
+          }
+          return res.json();
+      })
+      .then((data) => 
+            drawingList = data)
+      .catch((error) => 
+             console.error("Unable to fetch data:", error));
 }
 
 function setup() {
