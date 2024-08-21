@@ -1,8 +1,10 @@
 /*--------------------- Image variables -------------------------*/
+// Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
   "/assets/p1.jpg", 
   "/assets/p2.jpg", 
-  "/assets/p3.jpg"
+  "/assets/p3.jpg",
+  "/assets/p4.jpg"
 ]
 let loadedImages = [];
 let currentImageIndex = 0;
@@ -21,6 +23,8 @@ let currentStroke = [];
 const setStrokeWeight = 10;
 const colorList = ["red", "blue", "violet", "yellow"];
 let currentColorIndex = 0;
+let showingOldDrawings = false;
+let seeAllDrawingsButton;
 
 /*--------------------- Classes -------------------------*/
 /* 
@@ -54,9 +58,9 @@ function setup() {
   submitButton.position(20, buttonHeight);
   submitButton.mousePressed(submitDrawing);
 
-  let seeAllDrawingsButton = createButton("see all drawings");
+  seeAllDrawingsButton = createButton("see all drawings");
   seeAllDrawingsButton.position(150, buttonHeight);
-  seeAllDrawingsButton.mousePressed(showAllDrawings);
+  seeAllDrawingsButton.mousePressed(handleShowDrawingButton);
 
   let undoButton = createButton("undo");
   undoButton.position(410, buttonHeight);
@@ -65,6 +69,10 @@ function setup() {
   let clearButton = createButton("clear");
   clearButton.position(520, buttonHeight);
   clearButton.mousePressed(clearCanvas);
+
+  let nextButton = createButton("next image");
+  nextButton.position(630, buttonHeight);
+  nextButton.mousePressed(nextImage);
   
   strokeWeight(setStrokeWeight);
   stroke(colorList[currentColorIndex]);
@@ -115,9 +123,21 @@ function drawAllStrokes(slist) {
   }
 }
 
+function handleShowDrawingButton() {
+  if (!showingOldDrawings) {
+    seeAllDrawingsButton.style("background-color","green");
+    showAllDrawings();
+    showingOldDrawings = true;
+  } else {
+    seeAllDrawingsButton.style("background-color","yellow");
+    clearCanvas();
+    showingOldDrawings = false;
+  }
+}
+
 function showAllDrawings() {
   let relevantDrawings = drawingList.filter(d => d.imgIndex == currentImageIndex); 
-  console.log(relevantDrawings.length);
+
   for (var drawing of relevantDrawings) {
     push();
     stroke(drawing.colorStr);
@@ -127,7 +147,6 @@ function showAllDrawings() {
 }
 
 function nextImage() {
-  // iterate to next image
   currentImageIndex = currentImageIndex >= loadedImages.length - 1 ? 0 : currentImageIndex + 1;
   clearCanvas(); // also remove the current drawings 
 }
