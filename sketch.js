@@ -1,3 +1,7 @@
+/*
+  Todos: 
+  - Re-do button rendering and lineup 
+*/
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
@@ -9,7 +13,9 @@ const imgPathList = [
 let loadedImages = [];
 let currentImageIndex = 0;
 let buttonHeight;
-let promptTextSize = 50;
+let promptTextSize = 50; //Gets rewritten based on window width 
+const drawPromptText = "Do you see something in this image? Draw it!";
+const showPromptText = "Tap the screen to start drawing";
 
 /*--------------------- Drawings variables -------------------------*/
 /*
@@ -25,8 +31,15 @@ let currentStroke = [];
 const setStrokeWeight = 10;
 const colorList = ["red", "blue", "violet", "yellow"];
 let currentColorIndex = 0;
-let showingOldDrawings = false;
-let seeAllDrawingsButton;
+
+/* There are two modes; drawing mode, and showing mode 
+ * Drawing + drawing IO, image navigation, only available in drawing mode 
+ */ 
+let drawMode = true; 
+let tapForEscape = false;
+let seeAllDrawingsButton, submitButton, undoButton, clearButton, nextButton;
+let drawModeButtons;
+const buttonOffset = 100;
 
 /*--------------------- Classes -------------------------*/
 /* 
@@ -74,33 +87,42 @@ function setup() {
   promptTextSize = Math.floor(window.innerWidth/21);
 
   resetBackground();
-
-  let submitButton = createButton("submit");
-  submitButton.position(20, buttonHeight);
-  submitButton.mousePressed(submitDrawing);
-
-  seeAllDrawingsButton = createButton("see all drawings");
-  seeAllDrawingsButton.position(150, buttonHeight);
-  seeAllDrawingsButton.mousePressed(handleShowDrawingButton);
-
-  let undoButton = createButton("undo");
-  undoButton.position(410, buttonHeight);
-  undoButton.mousePressed(undo);
-
-  let clearButton = createButton("clear");
-  clearButton.position(520, buttonHeight);
-  clearButton.mousePressed(clearCanvas);
-
-  let nextButton = createButton("next image");
-  nextButton.position(630, buttonHeight);
-  nextButton.mousePressed(nextImage);
-  
+  buttonInit();
   strokeWeight(setStrokeWeight);
   stroke(colorList[currentColorIndex]);
 }
 
+
 function draw() {
   drawPrompt();
+}
+
+function buttonInit() {
+  submitButton = createButton("submit");
+  submitButton.position(20 + buttonOffset, buttonHeight);
+  submitButton.mousePressed(submitDrawing);
+  submitButton.style('background-color', "orange");
+
+  seeAllDrawingsButton = createButton("see all drawings");
+  seeAllDrawingsButton.position(152 + buttonOffset, buttonHeight);
+  seeAllDrawingsButton.mousePressed(() => {
+    console.log('see drawings button');
+    toggleMode();
+  });
+
+  undoButton = createButton("undo");
+  undoButton.position(410 + buttonOffset, buttonHeight);
+  undoButton.mousePressed(undo);
+
+  clearButton = createButton("clear");
+  clearButton.position(520 + buttonOffset, buttonHeight);
+  clearButton.mousePressed(clearCanvas);
+
+  nextButton = createButton("next image");
+  nextButton.position(630 + buttonOffset, buttonHeight);
+  nextButton.mousePressed(nextImage);
+
+  drawModeButtons = [submitButton, undoButton, clearButton, nextButton, seeAllDrawingsButton];
 }
 
 function drawPrompt() {
@@ -109,7 +131,11 @@ function drawPrompt() {
   strokeWeight(3);
   stroke('black');
   fill('yellow');
-  text("Do you see something in this image? Draw it!", 40, window.innerHeight-150);
+  if (drawMode) {
+    text(drawPromptText, 40, window.innerHeight-150);
+  } else {
+    text(showPromptText, 150, window.innerHeight-100);
+  }
   pop();
 }
 
@@ -147,15 +173,26 @@ function drawAllStrokes(slist) {
 /* 
  * TODO: handle the on/off change also when moving to next image
 */
-function handleShowDrawingButton() {
-  if (!showingOldDrawings) {
+function toggleMode() {
+  if (drawMode) { // draw mode -> show mode
     seeAllDrawingsButton.style("background-color","green");
+    for (b of drawModeButtons) { // hide all buttons
+      b.hide();
+    }
+    resetBackground();
     showAllDrawings();
-    showingOldDrawings = true;
-  } else {
+    drawMode = false;
+    setTimeout(() => { // Otherwise, the tap will be registered due to button click and toggle immediately
+      tapForEscape = true;
+    }, 200);
+  } else { // show mode -> draw mode 
     seeAllDrawingsButton.style("background-color","yellow");
     clearCanvas();
-    showingOldDrawings = false;
+    for (b of drawModeButtons) { // show all buttons
+      b.show();
+    }
+    tapForEscape = false;
+    drawMode = true;
   }
 }
 
@@ -185,18 +222,33 @@ function changeColor() {
 
 //-------------------- IO ---------------------//
 function mouseReleased() {
-  endStroke();
+  if (drawMode) {
+    endStroke();
+  }
 }
 
 function touchEnded() {
-  endStroke();
+  if (drawMode) {
+    endStroke();
+  }
 }
 
-// touch functionality means the mouse can "jump" across the screen 
-// This is a hack to make sure the stroke starts where touch starts 
+// function mousePressed() {
+//   if (tapForEscape) {
+//     console.log("toggling");
+//     toggleMode();
+//   }
+// }
+
 function touchStarted() {
+  // touch functionality means the mouse can "jump" across the screen 
+  // This is a hack to make sure the stroke starts where touch starts 
   pmouseX = mouseX;
   pmouseY = mouseY;
+  if (tapForEscape) {
+    console.log("toggling");
+    toggleMode();
+  }
 }
 
 function endStroke() {
@@ -212,15 +264,17 @@ function endStroke() {
 
 // mouseDragged runs on touch on mobile, so long as touchMoved is not defined
 function mouseDragged() {
-  // add the first point to the stroke if not dragged yet
-  // only useful for mouseDrag, not required for touch 
-  if (currentStroke.length == 0) {
-    console.log('taking last point ', pmouseX, pmouseY)
-    currentStroke.push({ x: pmouseX, y: pmouseY });
-  }
+  if (drawMode) {
+    // add the first point to the stroke if not dragged yet
+    // only useful for mouseDrag, not required for touch 
+    if (currentStroke.length == 0) {
+      console.log('taking last point ', pmouseX, pmouseY)
+      currentStroke.push({ x: pmouseX, y: pmouseY });
+    }
 
-  line(pmouseX, pmouseY, mouseX, mouseY);
-  currentStroke.push({ x: mouseX, y: mouseY });
+    line(pmouseX, pmouseY, mouseX, mouseY);
+    currentStroke.push({ x: mouseX, y: mouseY });
+  }
 }
 
 function undo() {
