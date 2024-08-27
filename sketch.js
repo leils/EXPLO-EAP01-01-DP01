@@ -1,3 +1,7 @@
+/*
+  Todos: 
+  - Re-do button rendering and lineup 
+*/
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
@@ -32,9 +36,10 @@ let currentColorIndex = 0;
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
 let drawMode = true; 
-let seeAllDrawingsButton;
-let submitButton, undoButton, clearButton, nextButton;
+let tapForEscape = false;
+let seeAllDrawingsButton, submitButton, undoButton, clearButton, nextButton;
 let drawModeButtons;
+const buttonOffset = 100;
 
 /*--------------------- Classes -------------------------*/
 /* 
@@ -94,29 +99,30 @@ function draw() {
 
 function buttonInit() {
   submitButton = createButton("submit");
-  submitButton.position(20, buttonHeight);
+  submitButton.position(20 + buttonOffset, buttonHeight);
   submitButton.mousePressed(submitDrawing);
+  submitButton.style('background-color', "orange");
 
   seeAllDrawingsButton = createButton("see all drawings");
-  seeAllDrawingsButton.position(150, buttonHeight);
+  seeAllDrawingsButton.position(152 + buttonOffset, buttonHeight);
   seeAllDrawingsButton.mousePressed(() => {
     console.log('see drawings button');
     toggleMode();
   });
 
   undoButton = createButton("undo");
-  undoButton.position(410, buttonHeight);
+  undoButton.position(410 + buttonOffset, buttonHeight);
   undoButton.mousePressed(undo);
 
   clearButton = createButton("clear");
-  clearButton.position(520, buttonHeight);
+  clearButton.position(520 + buttonOffset, buttonHeight);
   clearButton.mousePressed(clearCanvas);
 
   nextButton = createButton("next image");
-  nextButton.position(630, buttonHeight);
+  nextButton.position(630 + buttonOffset, buttonHeight);
   nextButton.mousePressed(nextImage);
 
-  drawModeButtons = [submitButton, undoButton, clearButton, nextButton];
+  drawModeButtons = [submitButton, undoButton, clearButton, nextButton, seeAllDrawingsButton];
 }
 
 function drawPrompt() {
@@ -128,7 +134,7 @@ function drawPrompt() {
   if (drawMode) {
     text(drawPromptText, 40, window.innerHeight-150);
   } else {
-    text(showPromptText, 40, window.innerHeight-150);
+    text(showPromptText, 150, window.innerHeight-100);
   }
   pop();
 }
@@ -176,12 +182,16 @@ function toggleMode() {
     resetBackground();
     showAllDrawings();
     drawMode = false;
+    setTimeout(() => { // Otherwise, the tap will be registered due to button click and toggle immediately
+      tapForEscape = true;
+    }, 200);
   } else { // show mode -> draw mode 
     seeAllDrawingsButton.style("background-color","yellow");
     clearCanvas();
     for (b of drawModeButtons) { // show all buttons
       b.show();
     }
+    tapForEscape = false;
     drawMode = true;
   }
 }
@@ -223,20 +233,22 @@ function touchEnded() {
   }
 }
 
-function mousePressed() {
-  if (!drawMode) {
+// function mousePressed() {
+//   if (tapForEscape) {
+//     console.log("toggling");
+//     toggleMode();
+//   }
+// }
+
+function touchStarted() {
+  // touch functionality means the mouse can "jump" across the screen 
+  // This is a hack to make sure the stroke starts where touch starts 
+  pmouseX = mouseX;
+  pmouseY = mouseY;
+  if (tapForEscape) {
     console.log("toggling");
     toggleMode();
   }
-}
-
-// touch functionality means the mouse can "jump" across the screen 
-// This is a hack to make sure the stroke starts where touch starts 
-function touchStarted() {
-  if (drawMode) {
-    pmouseX = mouseX;
-    pmouseY = mouseY;
-  } 
 }
 
 function endStroke() {
