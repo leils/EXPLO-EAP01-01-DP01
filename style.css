@@ -17,3 +17,8 @@ button {
   background:yellow;
   user-select: none;
 }
+
+.submitButton {
+  background-color: orange;
+  font-weight: bold;
+}
