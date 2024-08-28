@@ -1,7 +1,3 @@
-/*
-  Todos: 
-  - Re-do button rendering and lineup 
-*/
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
@@ -37,9 +33,30 @@ let currentColorIndex = 0;
  */ 
 let drawMode = true; 
 let tapForEscape = false;
-let seeAllDrawingsButton, submitButton, undoButton, clearButton, nextButton;
-let drawModeButtons;
-const buttonOffset = 100;
+
+/*--------------------- Buttons -------------------------*/
+let drawModeButtons = [];
+const buttonOffset = 40;
+
+const buttonInfo = [ 
+  {
+    label: "Undo",
+    clickFunct: undo
+  }, 
+  {
+    label: "Submit",
+    clickFunct: submitDrawing,
+    className: "submitButton"
+  }, 
+  {
+    label: "Show All Drawings",
+    clickFunct: toggleMode
+  }, 
+  {
+    label: "Next Image",
+    clickFunct: nextImage
+  }
+]
 
 /*--------------------- Classes -------------------------*/
 /* 
@@ -98,31 +115,19 @@ function draw() {
 }
 
 function buttonInit() {
-  submitButton = createButton("submit");
-  submitButton.position(20 + buttonOffset, buttonHeight);
-  submitButton.mousePressed(submitDrawing);
-  submitButton.style('background-color', "orange");
+  let spaceOffset = buttonOffset;
+  for (var i=0; i < buttonInfo.length; i++) {
+    let bInfo = buttonInfo[i];
+    let newButton = createButton(bInfo.label);
+    if (bInfo.hasOwnProperty("className")) {
+      newButton.class(bInfo.className);
+    }
+    newButton.position(spaceOffset, buttonHeight);
+    newButton.mousePressed(bInfo.clickFunct);
 
-  seeAllDrawingsButton = createButton("see all drawings");
-  seeAllDrawingsButton.position(152 + buttonOffset, buttonHeight);
-  seeAllDrawingsButton.mousePressed(() => {
-    console.log('see drawings button');
-    toggleMode();
-  });
-
-  undoButton = createButton("undo");
-  undoButton.position(410 + buttonOffset, buttonHeight);
-  undoButton.mousePressed(undo);
-
-  clearButton = createButton("clear");
-  clearButton.position(520 + buttonOffset, buttonHeight);
-  clearButton.mousePressed(clearCanvas);
-
-  nextButton = createButton("next image");
-  nextButton.position(630 + buttonOffset, buttonHeight);
-  nextButton.mousePressed(nextImage);
-
-  drawModeButtons = [submitButton, undoButton, clearButton, nextButton, seeAllDrawingsButton];
+    spaceOffset += (newButton.width + buttonOffset);
+    drawModeButtons.push(newButton);
+  }
 }
 
 function drawPrompt() {
@@ -170,23 +175,20 @@ function drawAllStrokes(slist) {
   }
 }
 
-/* 
- * TODO: handle the on/off change also when moving to next image
-*/
 function toggleMode() {
   if (drawMode) { // draw mode -> show mode
-    seeAllDrawingsButton.style("background-color","green");
     for (b of drawModeButtons) { // hide all buttons
       b.hide();
     }
     resetBackground();
     showAllDrawings();
     drawMode = false;
-    setTimeout(() => { // Otherwise, the tap will be registered due to button click and toggle immediately
+
+    // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
+    setTimeout(() => { 
       tapForEscape = true;
     }, 200);
   } else { // show mode -> draw mode 
-    seeAllDrawingsButton.style("background-color","yellow");
     clearCanvas();
     for (b of drawModeButtons) { // show all buttons
       b.show();
@@ -220,7 +222,7 @@ function changeColor() {
   stroke(colorList[currentColorIndex]);
 }
 
-//-------------------- IO ---------------------//
+//-------------------- Drawing & Mouse ---------------------//
 function mouseReleased() {
   if (drawMode) {
     endStroke();
@@ -232,13 +234,6 @@ function touchEnded() {
     endStroke();
   }
 }
-
-// function mousePressed() {
-//   if (tapForEscape) {
-//     console.log("toggling");
-//     toggleMode();
-//   }
-// }
 
 function touchStarted() {
   // touch functionality means the mouse can "jump" across the screen 
@@ -286,6 +281,8 @@ function undo() {
   }
 }
 
+//-------------------- Canvas ---------------------//
+
 function clearCanvas() {
   strokeList = [];
   resetBackground();
@@ -309,6 +306,7 @@ function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
 }
 
+//-------------------- Admin ---------------------//
 function keyPressed() {
   if (key == "s") {
     submitDrawing();
