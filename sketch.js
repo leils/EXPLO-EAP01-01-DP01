@@ -1,7 +1,3 @@
-/*
-  Todos: 
-  - Re-do button rendering and lineup 
-*/
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
 const imgPathList = [
@@ -37,7 +33,8 @@ let currentColorIndex = 0;
  */ 
 let drawMode = true; 
 let tapForEscape = false;
-let seeAllDrawingsButton, submitButton, undoButton, clearButton, nextButton;
+
+/*--------------------- Buttons -------------------------*/
 let drawModeButtons = [];
 const buttonOffset = 40;
 
@@ -45,10 +42,6 @@ const buttonInfo = [
   {
     label: "Undo",
     clickFunct: undo
-  }, 
-  {
-    label: "Clear",
-    clickFunct: clearCanvas
   }, 
   {
     label: "Submit",
@@ -182,9 +175,6 @@ function drawAllStrokes(slist) {
   }
 }
 
-/* 
- * TODO: handle the on/off change also when moving to next image
-*/
 function toggleMode() {
   if (drawMode) { // draw mode -> show mode
     for (b of drawModeButtons) { // hide all buttons
@@ -193,7 +183,9 @@ function toggleMode() {
     resetBackground();
     showAllDrawings();
     drawMode = false;
-    setTimeout(() => { // Otherwise, the tap will be registered due to button click and toggle immediately
+
+    // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
+    setTimeout(() => { 
       tapForEscape = true;
     }, 200);
   } else { // show mode -> draw mode 
@@ -230,7 +222,7 @@ function changeColor() {
   stroke(colorList[currentColorIndex]);
 }
 
-//-------------------- IO ---------------------//
+//-------------------- Drawing & Mouse ---------------------//
 function mouseReleased() {
   if (drawMode) {
     endStroke();
@@ -242,7 +234,6 @@ function touchEnded() {
     endStroke();
   }
 }
-
 
 function touchStarted() {
   // touch functionality means the mouse can "jump" across the screen 
@@ -290,6 +281,8 @@ function undo() {
   }
 }
 
+//-------------------- Canvas ---------------------//
+
 function clearCanvas() {
   strokeList = [];
   resetBackground();
@@ -313,6 +306,7 @@ function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
 }
 
+//-------------------- Admin ---------------------//
 function keyPressed() {
   if (key == "s") {
     submitDrawing();
