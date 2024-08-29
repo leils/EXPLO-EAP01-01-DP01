@@ -32,6 +32,10 @@ let currentColorIndex = 0;
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
 let drawMode = true; 
+let relevantDrawings = [];
+let drawingIndex = 0;
+let drawingOpacity = 0;
+let drawingColor;
 let tapForEscape = false;
 
 /*--------------------- Buttons -------------------------*/
@@ -47,10 +51,6 @@ const buttonInfo = [
     label: "Submit",
     clickFunct: submitDrawing,
     className: "submitButton"
-  }, 
-  {
-    label: "Show All Drawings",
-    clickFunct: toggleMode
   }, 
   {
     label: "Next Image",
@@ -111,6 +111,9 @@ function setup() {
 
 
 function draw() {
+  if (!drawMode) {
+    showModeRenderFrame();
+  }
   drawPrompt();
 }
 
@@ -170,9 +173,7 @@ function toggleMode() {
     for (b of drawModeButtons) { // hide all buttons
       b.hide();
     }
-    resetBackground();
-    showAllDrawings();
-    drawMode = false;
+    showModeSetup();
 
     // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
     setTimeout(() => { 
@@ -185,18 +186,49 @@ function toggleMode() {
     }
     tapForEscape = false;
     drawMode = true;
+
+    showModeTeardown();
   }
 }
 
-function showAllDrawings() {
-  let relevantDrawings = drawingList.filter(d => d.imgIndex == currentImageIndex); 
+function showModeSetup() {
+  console.log('show mode setup');
+  resetBackground();
+  relevantDrawings = drawingList.filter(d => d.imgIndex == currentImageIndex);
+  drawingIndex = 0;
+  drawingOpacity = 0;
+  drawingColor = color(relevantDrawings[drawingIndex].colorStr);
 
-  for (var drawing of relevantDrawings) {
-    push();
-    stroke(drawing.colorStr);
-    drawStrokes(drawing.strokes);
-    pop();
+  drawMode = false;
+}
+
+function showModeTeardown() {
+  drawingIndex = 0;
+  drawingOpacity = 0;
+  relevantDrawings = [];
+}
+
+function showModeRenderFrame() {
+  resetBackground();
+  push();
+  let drawing = relevantDrawings[drawingIndex];
+  drawingColor.setAlpha(drawingOpacity);
+  stroke(drawingColor);
+  drawAllStrokes(drawing.strokes);
+  
+  if (drawingOpacity < 255) {
+    drawingOpacity+=3;
+    console.log(drawingOpacity)
+  } else {
+    getNextDrawing();
   }
+  pop();
+}
+
+function getNextDrawing() {
+  drawingIndex = drawingIndex < relevantDrawings.length - 1 ? drawingIndex + 1 : 0;
+  drawingOpacity = 0;
+  drawingColor = color(relevantDrawings[drawingIndex].colorStr);
 }
 
 function nextImage() {
@@ -272,7 +304,6 @@ function undo() {
 }
 
 //-------------------- Canvas ---------------------//
-
 function clearCanvas() {
   strokeList = [];
   resetBackground();
@@ -307,7 +338,7 @@ function keyPressed() {
   } else if (key == "r") {
     resetBackground();
   } else if (key == "a") {
-    showAllDrawings();
+    toggleMode();
   } else if (key == "n") {
     nextImage();
   } else if (key == "1") {
