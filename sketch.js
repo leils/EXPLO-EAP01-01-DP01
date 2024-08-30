@@ -262,6 +262,7 @@ function submitDrawing() {
     strokeList = [];
     resetBackground();
     changeColor();
+    toggleMode();
   }
 }
 
