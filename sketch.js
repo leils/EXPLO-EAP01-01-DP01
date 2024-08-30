@@ -12,7 +12,7 @@ let buttonHeight;
 let promptTextSize = 50; //Gets rewritten based on window width 
 const drawPromptText = "Do you see something in this image? Draw it!";
 const showPromptText = "Tap the screen to start drawing";
-const afterSubmitText = "Thanks! Now let's see what other people drew.";
+const afterSubmitText = "Great! Let's see what other people drew.";
 
 /*--------------------- Drawings variables -------------------------*/
 /*
@@ -130,14 +130,11 @@ function buttonInit() {
     if (bInfo.hasOwnProperty("className")) {
       newButton.class(bInfo.className);
     }
-    // newButton.position(spaceOffset, buttonHeight);
     newButton.mousePressed(bInfo.clickFunct);
 
-    // spaceOffset += (newButton.width + buttonOffset);
     totalWidth += newButton.width;
     allButtons.push(newButton);
   }
-  console.log(totalWidth);
 
   // centering the buttons on-screen
   totalWidth += (allButtons.length - 1) * buttonOffset;
@@ -288,6 +285,10 @@ function handleFlashAnimation() {
   if (flashOpacity > 0) {
     push();
     resetBackground();
+    noStroke();
+    fill('black');
+    rectMode(CENTER);
+    rect(window.innerWidth/2, window.innerHeight/2 - (promptTextSize/3), window.innerWidth, 100, 30);
     strokeWeight(3);
     stroke('black');
     fill('yellow');
