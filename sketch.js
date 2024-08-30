@@ -150,28 +150,18 @@ function resetBackground() {
 }
 
 /**
- * drawStroke draws a single stroke
- * @param {Array.{x:number, y:number}} s array of points
- **/
-function drawStroke(s) {
-  // the if is a double check, we may want to remove
-  if (s.length > 1) {
-    //ensure we have 2 or more points to draw a line
-    for (var i = 1; i < s.length; i++) {
-      var lastPoint = s[i - 1];
-      var currentPoint = s[i];
-      line(lastPoint.x, lastPoint.y, currentPoint.x, currentPoint.y);
-    }
-  }
-}
-
-/**
- * drawAllStrokes
+ * drawStrokes
  * @param {Array.Array.{x:number, y:number}} slist array of strokes
  **/
-function drawAllStrokes(slist) {
+function drawStrokes(slist) {
   for (var stroke of slist) {
-    drawStroke(stroke);
+    if (stroke.length > 1) {
+      for (var i = 1; i < stroke.length; i++) {
+        var lastPoint = stroke[i - 1];
+        var currentPoint = stroke[i];
+        line(lastPoint.x, lastPoint.y, currentPoint.x, currentPoint.y);
+      } 
+    }
   }
 }
 
@@ -204,7 +194,7 @@ function showAllDrawings() {
   for (var drawing of relevantDrawings) {
     push();
     stroke(drawing.colorStr);
-    drawAllStrokes(drawing.strokes);
+    drawStrokes(drawing.strokes);
     pop();
   }
 }
@@ -276,7 +266,7 @@ function undo() {
   if (strokeList.length > 0) {
     strokeList.pop();
     resetBackground();
-    drawAllStrokes(strokeList);
+    drawStrokes(strokeList);
     console.log("undid");
   }
 }
