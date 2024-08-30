@@ -284,6 +284,13 @@ function toggleMode() {
     setTimeout(() => { 
       tapForEscape = true;
     }, 200);
+
+    // Set a timeout to return to draw mode after 30 seconds
+    setTimeout(() => {
+      if(!drawMode) {
+        toggleMode();
+      }
+    }, 30000)
   } else { // show mode -> draw mode 
     clearCanvas();
     for (b of drawModeButtons) { // show all buttons
