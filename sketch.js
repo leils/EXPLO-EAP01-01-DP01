@@ -32,7 +32,15 @@ let currentColorIndex = 0;
 /* There are two modes; drawing mode, and showing mode 
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
-let drawMode = true; 
+const Modes = Object.freeze({
+  DRAW: 0,
+  SUBMIT: 1,
+  SHOW: 2
+});
+
+let currentMode = Modes.DRAW;
+
+// let drawMode = true; 
 let drawingsForCurrentImage = [];
 let currentImageDrawingIndex = 0;
 let drawingOpacity = 0;
@@ -115,11 +123,12 @@ function setup() {
 
 
 function draw() {
-  if (!drawMode) {
+  if (currentMode == Modes.SHOW) {
     renderShowModeFrame();
   }
   handleFlashAnimation();
   drawPrompt();
+  console.log(currentMode);
 }
 
 function buttonInit() {
@@ -153,7 +162,7 @@ function drawPrompt() {
   strokeWeight(3);
   stroke('black');
   fill('yellow');
-  if (drawMode) {
+  if (currentMode == Modes.DRAW) {
     text(drawPromptText, window.innerWidth/2, window.innerHeight-150);
   } else {
     text(showPromptText, window.innerWidth/2, window.innerHeight-100);
@@ -203,13 +212,13 @@ function changeColor() {
 
 //-------------------- Drawing & Mouse ---------------------//
 function mouseReleased() {
-  if (drawMode) {
+  if (currentMode == Modes.DRAW) {
     endStroke();
   }
 }
 
 function touchEnded() {
-  if (drawMode) {
+  if (currentMode == Modes.DRAW) {
     endStroke();
   }
 }
@@ -220,7 +229,6 @@ function touchStarted() {
   pmouseX = mouseX;
   pmouseY = mouseY;
   if (tapForEscape) {
-    console.log("toggling");
     toggleMode();
   }
 }
@@ -238,7 +246,7 @@ function endStroke() {
 
 // mouseDragged runs on touch on mobile, so long as touchMoved is not defined
 function mouseDragged() {
-  if (drawMode) {
+  if (currentMode == Modes.DRAW) {
     // add the first point to the stroke if not dragged yet
     // only useful for mouseDrag, not required for touch 
     if (currentStroke.length == 0) {
@@ -314,7 +322,7 @@ function saveDrawingsToJson() {
 
 //-------------------- Show Modes ---------------------//
 function toggleMode() {
-  if (drawMode) { // draw mode -> show mode
+  if (currentMode == Modes.DRAW) { // draw mode -> show mode
     for (b of allButtons) { // hide all buttons
       b.hide();
     }
@@ -333,7 +341,7 @@ function toggleMode() {
 
     // Set a timeout to return to draw mode after 30 seconds
     setTimeout(() => {
-      if(!drawMode) {
+      if(currentMode == Modes.SHOW) {
         toggleMode();
       }
     }, 30000)
@@ -343,7 +351,8 @@ function toggleMode() {
       b.show();
     }
     tapForEscape = false;
-    drawMode = true;
+    // drawMode = true;
+    currentMode = Modes.DRAW
 
     showModeTeardown();
   }
@@ -357,7 +366,8 @@ function showModeSetup() {
   drawingOpacity = 0;
   drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
 
-  drawMode = false;
+  // drawMode = false;
+  currentMode = Modes.SHOW;
 }
 
 function showModeTeardown() {
