@@ -32,8 +32,8 @@ let currentColorIndex = 0;
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
 let drawMode = true; 
-let relevantDrawings = [];
-let drawingIndex = 0;
+let drawingsForCurrentImage = [];
+let currentImageDrawingIndex = 0;
 let drawingOpacity = 0;
 let drawingColor;
 let tapForEscape = false;
@@ -112,7 +112,7 @@ function setup() {
 
 function draw() {
   if (!drawMode) {
-    showModeRenderFrame();
+    renderShowModeFrame();
   }
   drawPrompt();
 }
@@ -168,67 +168,11 @@ function drawStrokes(slist) {
   }
 }
 
-function toggleMode() {
-  if (drawMode) { // draw mode -> show mode
-    for (b of drawModeButtons) { // hide all buttons
-      b.hide();
-    }
-    showModeSetup();
-
-    // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
-    setTimeout(() => { 
-      tapForEscape = true;
-    }, 200);
-  } else { // show mode -> draw mode 
-    clearCanvas();
-    for (b of drawModeButtons) { // show all buttons
-      b.show();
-    }
-    tapForEscape = false;
-    drawMode = true;
-
-    showModeTeardown();
-  }
-}
-
-function showModeSetup() {
-  console.log('show mode setup');
-  resetBackground();
-  relevantDrawings = drawingList.filter(d => d.imgIndex == currentImageIndex);
-  drawingIndex = 0;
-  drawingOpacity = 0;
-  drawingColor = color(relevantDrawings[drawingIndex].colorStr);
-
-  drawMode = false;
-}
-
-function showModeTeardown() {
-  drawingIndex = 0;
-  drawingOpacity = 0;
-  relevantDrawings = [];
-}
-
-function showModeRenderFrame() {
-  resetBackground();
-  push();
-  let drawing = relevantDrawings[drawingIndex];
-  drawingColor.setAlpha(drawingOpacity);
-  stroke(drawingColor);
-  drawAllStrokes(drawing.strokes);
-  
-  if (drawingOpacity < 255) {
-    drawingOpacity+=3;
-    console.log(drawingOpacity)
-  } else {
-    getNextDrawing();
-  }
-  pop();
-}
 
 function getNextDrawing() {
-  drawingIndex = drawingIndex < relevantDrawings.length - 1 ? drawingIndex + 1 : 0;
+  currentImageDrawingIndex = currentImageDrawingIndex < drawingsForCurrentImage.length - 1 ? currentImageDrawingIndex + 1 : 0;
   drawingOpacity = 0;
-  drawingColor = color(relevantDrawings[drawingIndex].colorStr);
+  drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
 }
 
 function nextImage() {
@@ -325,6 +269,65 @@ function submitDrawing() {
 // instead it creates a downloadable JSON file 
 function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
+}
+
+//-------------------- Show Modes ---------------------//
+function toggleMode() {
+  if (drawMode) { // draw mode -> show mode
+    for (b of drawModeButtons) { // hide all buttons
+      b.hide();
+    }
+    showModeSetup();
+
+    // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
+    setTimeout(() => { 
+      tapForEscape = true;
+    }, 200);
+  } else { // show mode -> draw mode 
+    clearCanvas();
+    for (b of drawModeButtons) { // show all buttons
+      b.show();
+    }
+    tapForEscape = false;
+    drawMode = true;
+
+    showModeTeardown();
+  }
+}
+
+function showModeSetup() {
+  console.log('show mode setup');
+  resetBackground();
+  drawingsForCurrentImage = drawingList.filter(d => d.imgIndex == currentImageIndex);
+  currentImageDrawingIndex = 0;
+  drawingOpacity = 0;
+  drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
+
+  drawMode = false;
+}
+
+function showModeTeardown() {
+  currentImageDrawingIndex = 0;
+  drawingOpacity = 0;
+  drawingsForCurrentImage = [];
+}
+
+function renderShowModeFrame() {
+  resetBackground();
+  
+  push();
+  let drawing = drawingsForCurrentImage[currentImageDrawingIndex];
+  drawingColor.setAlpha(drawingOpacity);
+  stroke(drawingColor);
+  drawAllStrokes(drawing.strokes);
+  
+  if (drawingOpacity < 255) {
+    drawingOpacity+=3;
+    console.log(drawingOpacity)
+  } else {
+    getNextDrawing();
+  }
+  pop();
 }
 
 //-------------------- Admin ---------------------//
