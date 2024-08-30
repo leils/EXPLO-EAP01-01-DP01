@@ -104,6 +104,7 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   buttonHeight = window.innerHeight - 130;
   promptTextSize = Math.floor(window.innerWidth/21);
+  textSize(promptTextSize);
 
   resetBackground();
   buttonInit();
@@ -137,8 +138,8 @@ function buttonInit() {
 }
 
 function drawPrompt() {
+  // TODO keep this prompt from appearing during animation? 
   push();
-  textSize(promptTextSize);
   strokeWeight(3);
   stroke('black');
   fill('yellow');
@@ -274,6 +275,13 @@ function handleFlashAnimation() {
   if (flashOpacity > 0) {
     push();
     resetBackground();
+    strokeWeight(3);
+    stroke('black');
+    fill('yellow');
+    textAlign(CENTER);
+    text(afterSubmitText, window.innerWidth/2, window.innerHeight/2);
+    pop();
+    push();
     let flashColor = color("white");
     flashColor.setAlpha(flashOpacity);
     fill(flashColor);
