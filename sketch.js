@@ -12,6 +12,7 @@ let buttonHeight;
 let promptTextSize = 50; //Gets rewritten based on window width 
 const drawPromptText = "Do you see something in this image? Draw it!";
 const showPromptText = "Tap the screen to start drawing";
+const afterSubmitText = "Thanks! Now let's see what other people drew.";
 
 /*--------------------- Drawings variables -------------------------*/
 /*
@@ -40,7 +41,7 @@ let tapForEscape = false;
 let flashOpacity = 0;
 
 /*--------------------- Buttons -------------------------*/
-let drawModeButtons = [];
+let allButtons = [];
 const buttonOffset = 40;
 
 const buttonInfo = [ 
@@ -131,7 +132,7 @@ function buttonInit() {
     newButton.mousePressed(bInfo.clickFunct);
 
     spaceOffset += (newButton.width + buttonOffset);
-    drawModeButtons.push(newButton);
+    allButtons.push(newButton);
   }
 }
 
@@ -169,7 +170,6 @@ function drawStrokes(slist) {
     }
   }
 }
-
 
 function getNextDrawing() {
   currentImageDrawingIndex = currentImageDrawingIndex < drawingsForCurrentImage.length - 1 ? currentImageDrawingIndex + 1 : 0;
@@ -292,10 +292,16 @@ function saveDrawingsToJson() {
 //-------------------- Show Modes ---------------------//
 function toggleMode() {
   if (drawMode) { // draw mode -> show mode
-    for (b of drawModeButtons) { // hide all buttons
+    for (b of allButtons) { // hide all buttons
       b.hide();
     }
-    showModeSetup();
+    resetBackground();
+
+    setTimeout(() => {
+      showModeSetup();
+      
+    },2000);
+
 
     // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
     setTimeout(() => { 
@@ -310,7 +316,7 @@ function toggleMode() {
     }, 30000)
   } else { // show mode -> draw mode 
     clearCanvas();
-    for (b of drawModeButtons) { // show all buttons
+    for (b of allButtons) { // show all buttons
       b.show();
     }
     tapForEscape = false;
@@ -347,7 +353,7 @@ function renderShowModeFrame() {
   drawAllStrokes(drawing.strokes);
   
   if (drawingOpacity < 255) {
-    drawingOpacity+=3;
+    drawingOpacity+=2;
     console.log(drawingOpacity)
   } else {
     getNextDrawing();
