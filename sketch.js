@@ -105,6 +105,7 @@ function setup() {
   buttonHeight = window.innerHeight - 130;
   promptTextSize = Math.floor(window.innerWidth/21);
   textSize(promptTextSize);
+  textAlign(CENTER);
 
   resetBackground();
   buttonInit();
@@ -122,19 +123,31 @@ function draw() {
 }
 
 function buttonInit() {
-  let spaceOffset = buttonOffset;
+  let totalWidth = 0;
   for (var i=0; i < buttonInfo.length; i++) {
     let bInfo = buttonInfo[i];
     let newButton = createButton(bInfo.label);
     if (bInfo.hasOwnProperty("className")) {
       newButton.class(bInfo.className);
     }
-    newButton.position(spaceOffset, buttonHeight);
+    // newButton.position(spaceOffset, buttonHeight);
     newButton.mousePressed(bInfo.clickFunct);
 
-    spaceOffset += (newButton.width + buttonOffset);
+    // spaceOffset += (newButton.width + buttonOffset);
+    totalWidth += newButton.width;
     allButtons.push(newButton);
   }
+  console.log(totalWidth);
+
+  // centering the buttons on-screen
+  totalWidth += (allButtons.length - 1) * buttonOffset;
+  let spaceOffset = (window.innerWidth - totalWidth)/2;
+
+  for (b of allButtons) {
+    b.position(spaceOffset, buttonHeight);
+    spaceOffset += (buttonOffset + b.width);
+  }
+
 }
 
 function drawPrompt() {
@@ -144,9 +157,9 @@ function drawPrompt() {
   stroke('black');
   fill('yellow');
   if (drawMode) {
-    text(drawPromptText, 40, window.innerHeight-150);
+    text(drawPromptText, window.innerWidth/2, window.innerHeight-150);
   } else {
-    text(showPromptText, 150, window.innerHeight-100);
+    text(showPromptText, window.innerWidth/2, window.innerHeight-100);
   }
   pop();
 }
@@ -282,6 +295,7 @@ function handleFlashAnimation() {
     text(afterSubmitText, window.innerWidth/2, window.innerHeight/2);
     pop();
     push();
+    noStroke();
     let flashColor = color("white");
     flashColor.setAlpha(flashOpacity);
     fill(flashColor);
