@@ -11,7 +11,7 @@ let currentImageIndex = 0;
 let buttonHeight;
 let promptTextSize = 50; //Gets rewritten based on window width 
 const drawPromptText = "Do you see something in this image? Draw it!";
-const showPromptText = "Tap the screen to start drawing";
+const showPromptText =  "Did they see what you saw? \nTap the screen to keep drawing!";
 const afterSubmitText = "Great! Let's see what other people drew.";
 
 /*--------------------- Drawings variables -------------------------*/
@@ -49,11 +49,9 @@ let flashOpacity = 0;
 //-------------------- Show Modes ---------------------//
 function toggleMode() {
   if (currentMode == Modes.DRAW) { // draw -> submit -> show 
-    for (b of allButtons) { // hide all buttons
-      b.hide();
-    }
+    for (b of allButtons) { b.hide(); } // hide all buttons
     currentMode = Modes.SUBMIT;
-    resetBackground();
+    renderBackground();
 
     setTimeout(() => { showModeSetup(); },2000); //goes to ShowMode in 2 seconds
 
@@ -64,19 +62,19 @@ function toggleMode() {
       }
     }, 30000)
 
-  } else { // show mode -> draw mode 
-    clearCanvas();
-    for (b of allButtons) { // show all buttons
-      b.show();
-    }
+  } else if (currentMode == Modes.SHOW) { // show mode -> draw mode 
+    resetCanvas();
+    for (b of allButtons) { b.show(); } // show all buttons
     currentMode = Modes.DRAW
 
     showModeTeardown();
+  } else {
+    throw Error("Unexpected toggle call during unsupported mode, likely Submit");
   }
 }
 
 function showModeSetup() {
-  resetBackground();
+  renderBackground();
   drawingsForCurrentImage = drawingList.filter(d => d.imgIndex == currentImageIndex);
   currentImageDrawingIndex = 0;
   drawingOpacity = 0;
@@ -92,20 +90,21 @@ function showModeTeardown() {
 }
 
 function renderShowModeFrame() {
-  resetBackground();
+  renderBackground();
   
   push();
   let drawing = drawingsForCurrentImage[currentImageDrawingIndex];
   drawingColor.setAlpha(drawingOpacity);
   stroke(drawingColor);
   drawStrokes(drawing.strokes);
-  
+  pop();
+
   if (drawingOpacity < 255) {
     drawingOpacity+=2;
   } else {
-    getNextDrawing();
+    nextDrawing();
+    drawingOpacity = 0;
   }
-  pop();
 }
 
 /*--------------------- Buttons -------------------------*/
@@ -148,11 +147,11 @@ function preload() {
     loadedImages.push(loadImage(path));
   }
 
-  fetchJSONData();
+  fetchJSONDrawings();
 }
 
 // Adapted from https://www.geeksforgeeks.org/read-json-file-using-javascript/
-function fetchJSONData() {
+function fetchJSONDrawings() {
   fetch("./drawings.json")
       .then((res) => {
           if (!res.ok) {
@@ -178,7 +177,7 @@ function setup() {
   strokeWeight(setStrokeWeight);
   stroke(colorList[currentColorIndex]);
 
-  resetBackground();
+  renderBackground();
   buttonInit();
 }
 
@@ -188,11 +187,12 @@ function draw() {
   }
   handleFlashAnimation();
   if (currentMode != Modes.SUBMIT) { drawPrompt(); }
-  console.log(currentMode);
 }
 
 function buttonInit() {
   let totalWidth = 0;
+
+  //initialize all buttons, but don't place them yet
   for (var i=0; i < buttonInfo.length; i++) {
     let bInfo = buttonInfo[i];
     let newButton = createButton(bInfo.label);
@@ -230,13 +230,13 @@ function drawPrompt() {
   if (currentMode == Modes.DRAW) {
     text(drawPromptText, window.innerWidth/2, window.innerHeight-150);
   } else {
-    text(showPromptText, window.innerWidth/2, window.innerHeight-100);
+    text(showPromptText, window.innerWidth/2, window.innerHeight-120);
   }
   pop();
 }
 
 // ------------------- Draw Functions ----------------//
-function resetBackground() {
+function renderBackground() {
   image(loadedImages[currentImageIndex], 0, 0, window.innerWidth, window.innerHeight);
 }
 
@@ -256,15 +256,14 @@ function drawStrokes(slist) {
   }
 }
 
-function getNextDrawing() {
+function nextDrawing() {
   currentImageDrawingIndex = currentImageDrawingIndex < drawingsForCurrentImage.length - 1 ? currentImageDrawingIndex + 1 : 0;
-  drawingOpacity = 0;
   drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
 }
 
 function nextImage() {
   currentImageIndex = currentImageIndex >= loadedImages.length - 1 ? 0 : currentImageIndex + 1;
-  clearCanvas(); // also remove the current drawings 
+  resetCanvas(); // also remove the current drawings 
 }
 
 function changeColor() {
@@ -324,15 +323,15 @@ function mouseDragged() {
 function undo() {
   if (strokeList.length > 0) {
     strokeList.pop();
-    resetBackground();
+    renderBackground();
     drawStrokes(strokeList);
   }
 }
 
 //-------------------- Canvas ---------------------//
-function clearCanvas() {
+function resetCanvas() {
   strokeList = [];
-  resetBackground();
+  renderBackground();
 }
 
 function submitDrawing() {
@@ -342,7 +341,7 @@ function submitDrawing() {
 
     flashOpacity = 255;
     strokeList = [];
-    resetBackground();
+    renderBackground();
     changeColor();
     toggleMode();
   }
@@ -351,7 +350,8 @@ function submitDrawing() {
 function handleFlashAnimation() {
   if (flashOpacity > 0) {
     push();
-    resetBackground();
+    // Rendering submit text
+    renderBackground();
     noStroke();
     fill('black');
     rectMode(CENTER);
@@ -364,6 +364,7 @@ function handleFlashAnimation() {
     pop();
 
     push();
+    // Render the "flash" animation
     noStroke();
     let flashColor = color("white");
     flashColor.setAlpha(flashOpacity);
@@ -380,18 +381,16 @@ function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
 }
 
-
-
 //-------------------- Admin ---------------------//
 function keyPressed() {
   if (key == "s") {
     submitDrawing();
   } else if (key == "c") {
-    clearCanvas();
+    resetCanvas();
   } else if (key == "u") {
     undo();
   } else if (key == "r") {
-    resetBackground();
+    renderBackground();
   } else if (key == "a") {
     toggleMode();
   } else if (key == "n") {
