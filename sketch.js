@@ -40,13 +40,73 @@ const Modes = Object.freeze({
 
 let currentMode = Modes.DRAW;
 
-// let drawMode = true; 
 let drawingsForCurrentImage = [];
 let currentImageDrawingIndex = 0;
 let drawingOpacity = 0;
 let drawingColor;
-let tapForEscape = false;
 let flashOpacity = 0;
+
+//-------------------- Show Modes ---------------------//
+function toggleMode() {
+  if (currentMode == Modes.DRAW) { // draw -> submit -> show 
+    for (b of allButtons) { // hide all buttons
+      b.hide();
+    }
+    currentMode = Modes.SUBMIT;
+    resetBackground();
+
+    setTimeout(() => { showModeSetup(); },2000); //goes to ShowMode in 2 seconds
+
+    // Set a timeout to return to draw mode after 30 seconds
+    setTimeout(() => {
+      if(currentMode == Modes.SHOW) {
+        toggleMode();
+      }
+    }, 30000)
+
+  } else { // show mode -> draw mode 
+    clearCanvas();
+    for (b of allButtons) { // show all buttons
+      b.show();
+    }
+    currentMode = Modes.DRAW
+
+    showModeTeardown();
+  }
+}
+
+function showModeSetup() {
+  resetBackground();
+  drawingsForCurrentImage = drawingList.filter(d => d.imgIndex == currentImageIndex);
+  currentImageDrawingIndex = 0;
+  drawingOpacity = 0;
+  drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
+
+  currentMode = Modes.SHOW;
+}
+
+function showModeTeardown() {
+  currentImageDrawingIndex = 0;
+  drawingOpacity = 0;
+  drawingsForCurrentImage = [];
+}
+
+function renderShowModeFrame() {
+  resetBackground();
+  
+  push();
+  let drawing = drawingsForCurrentImage[currentImageDrawingIndex];
+  drawingColor.setAlpha(drawingOpacity);
+  stroke(drawingColor);
+  drawStrokes(drawing.strokes);
+  
+  if (drawingOpacity < 255) {
+    drawingOpacity+=2;
+  } else {
+    getNextDrawing();
+  }
+  pop();
+}
 
 /*--------------------- Buttons -------------------------*/
 let allButtons = [];
@@ -110,24 +170,24 @@ function fetchJSONData() {
 function setup() {
   createMetaTag();
   createCanvas(window.innerWidth, window.innerHeight);
+
   buttonHeight = window.innerHeight - 120;
   promptTextSize = Math.floor(window.innerWidth/21);
   textSize(promptTextSize);
   textAlign(CENTER);
+  strokeWeight(setStrokeWeight);
+  stroke(colorList[currentColorIndex]);
 
   resetBackground();
   buttonInit();
-  strokeWeight(setStrokeWeight);
-  stroke(colorList[currentColorIndex]);
 }
-
 
 function draw() {
   if (currentMode == Modes.SHOW) {
     renderShowModeFrame();
   }
   handleFlashAnimation();
-  drawPrompt();
+  if (currentMode != Modes.SUBMIT) { drawPrompt(); }
   console.log(currentMode);
 }
 
@@ -157,7 +217,7 @@ function buttonInit() {
 }
 
 function drawPrompt() {
-  // TODO keep this prompt from appearing during animation? 
+  // TODO incorporate submit mode into promp drawing for clarity
   push();
   fill("black");
   noStroke();
@@ -210,7 +270,6 @@ function nextImage() {
 function changeColor() {
   currentColorIndex =
     currentColorIndex >= colorList.length - 1 ? 0 : currentColorIndex + 1;
-  console.log(currentColorIndex);
 
   stroke(colorList[currentColorIndex]);
 }
@@ -233,13 +292,12 @@ function touchStarted() {
   // This is a hack to make sure the stroke starts where touch starts 
   pmouseX = mouseX;
   pmouseY = mouseY;
-  if (tapForEscape) {
+  if (currentMode == Modes.SHOW) {
     toggleMode();
   }
 }
 
 function endStroke() {
-  console.log('ending stroke');
   // commit this stroke to the StrokeList
   if (currentStroke.length > 1) {
     strokeList.push(currentStroke);
@@ -255,7 +313,6 @@ function mouseDragged() {
     // add the first point to the stroke if not dragged yet
     // only useful for mouseDrag, not required for touch 
     if (currentStroke.length == 0) {
-      console.log('taking last point ', pmouseX, pmouseY)
       currentStroke.push({ x: pmouseX, y: pmouseY });
     }
 
@@ -269,7 +326,6 @@ function undo() {
     strokeList.pop();
     resetBackground();
     drawStrokes(strokeList);
-    console.log("undid");
   }
 }
 
@@ -277,11 +333,9 @@ function undo() {
 function clearCanvas() {
   strokeList = [];
   resetBackground();
-  console.log("cleared");
 }
 
 function submitDrawing() {
-  console.log("Submitting Drawing");
   if (strokeList.length > 0) {
     let d = new Drawing(currentImageIndex, colorList[currentColorIndex], strokeList);
     drawingList.push(d);
@@ -326,79 +380,7 @@ function saveDrawingsToJson() {
   saveJSON(drawingList, 'drawings.json');
 }
 
-//-------------------- Show Modes ---------------------//
-function toggleMode() {
-  if (currentMode == Modes.DRAW) { // draw mode -> show mode
-    for (b of allButtons) { // hide all buttons
-      b.hide();
-    }
-    resetBackground();
 
-    setTimeout(() => {
-      showModeSetup();
-      
-    },2000);
-
-
-    // Needs some delay, otherwise the tap will be registered due to button click and toggle immediately
-    setTimeout(() => { 
-      tapForEscape = true;
-    }, 200);
-
-    // Set a timeout to return to draw mode after 30 seconds
-    setTimeout(() => {
-      if(currentMode == Modes.SHOW) {
-        toggleMode();
-      }
-    }, 30000)
-  } else { // show mode -> draw mode 
-    clearCanvas();
-    for (b of allButtons) { // show all buttons
-      b.show();
-    }
-    tapForEscape = false;
-    // drawMode = true;
-    currentMode = Modes.DRAW
-
-    showModeTeardown();
-  }
-}
-
-function showModeSetup() {
-  console.log('show mode setup');
-  resetBackground();
-  drawingsForCurrentImage = drawingList.filter(d => d.imgIndex == currentImageIndex);
-  currentImageDrawingIndex = 0;
-  drawingOpacity = 0;
-  drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
-
-  // drawMode = false;
-  currentMode = Modes.SHOW;
-}
-
-function showModeTeardown() {
-  currentImageDrawingIndex = 0;
-  drawingOpacity = 0;
-  drawingsForCurrentImage = [];
-}
-
-function renderShowModeFrame() {
-  resetBackground();
-  
-  push();
-  let drawing = drawingsForCurrentImage[currentImageDrawingIndex];
-  drawingColor.setAlpha(drawingOpacity);
-  stroke(drawingColor);
-  drawAllStrokes(drawing.strokes);
-  
-  if (drawingOpacity < 255) {
-    drawingOpacity+=2;
-    console.log(drawingOpacity)
-  } else {
-    getNextDrawing();
-  }
-  pop();
-}
 
 //-------------------- Admin ---------------------//
 function keyPressed() {
