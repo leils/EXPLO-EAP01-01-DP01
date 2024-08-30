@@ -50,7 +50,7 @@ let flashOpacity = 0;
 
 /*--------------------- Buttons -------------------------*/
 let allButtons = [];
-const buttonOffset = 40;
+const buttonOffset = 100;
 
 const buttonInfo = [ 
   {
@@ -110,7 +110,7 @@ function fetchJSONData() {
 function setup() {
   createMetaTag();
   createCanvas(window.innerWidth, window.innerHeight);
-  buttonHeight = window.innerHeight - 130;
+  buttonHeight = window.innerHeight - 120;
   promptTextSize = Math.floor(window.innerWidth/21);
   textSize(promptTextSize);
   textAlign(CENTER);
@@ -159,6 +159,11 @@ function buttonInit() {
 function drawPrompt() {
   // TODO keep this prompt from appearing during animation? 
   push();
+  fill("black");
+  noStroke();
+  rectMode(CENTER);
+  rect(window.innerWidth/2, window.innerHeight - 100, window.innerWidth, 200, 30);
+
   strokeWeight(3);
   stroke('black');
   fill('yellow');
@@ -303,6 +308,7 @@ function handleFlashAnimation() {
     textAlign(CENTER);
     text(afterSubmitText, window.innerWidth/2, window.innerHeight/2);
     pop();
+
     push();
     noStroke();
     let flashColor = color("white");
