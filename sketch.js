@@ -37,6 +37,7 @@ let currentImageDrawingIndex = 0;
 let drawingOpacity = 0;
 let drawingColor;
 let tapForEscape = false;
+let flashOpacity = 0;
 
 /*--------------------- Buttons -------------------------*/
 let drawModeButtons = [];
@@ -114,6 +115,7 @@ function draw() {
   if (!drawMode) {
     renderShowModeFrame();
   }
+  handleFlashAnimation();
   drawPrompt();
 }
 
@@ -259,10 +261,25 @@ function submitDrawing() {
   if (strokeList.length > 0) {
     let d = new Drawing(currentImageIndex, colorList[currentColorIndex], strokeList);
     drawingList.push(d);
+
+    flashOpacity = 255;
     strokeList = [];
     resetBackground();
     changeColor();
     toggleMode();
+  }
+}
+
+function handleFlashAnimation() {
+  if (flashOpacity > 0) {
+    push();
+    resetBackground();
+    let flashColor = color("white");
+    flashColor.setAlpha(flashOpacity);
+    fill(flashColor);
+    rect(0,0,window.innerWidth, window.innerHeight);
+    flashOpacity = flashOpacity - 10;
+    pop(0);
   }
 }
 
