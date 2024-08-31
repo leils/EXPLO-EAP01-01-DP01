@@ -110,6 +110,7 @@ function renderShowModeFrame() {
 /*--------------------- Buttons -------------------------*/
 let allButtons = [];
 const buttonOffset = 100;
+const buttonDeadZoneHeight = 200;
 
 const buttonInfo = [ 
   {
@@ -221,8 +222,8 @@ function drawPrompt() {
   push();
   fill("black");
   noStroke();
-  rectMode(CENTER);
-  rect(window.innerWidth/2, window.innerHeight - 100, window.innerWidth, 200, 30);
+  rectMode(CORNER);
+  rect(0, window.innerHeight - buttonDeadZoneHeight, window.innerWidth, window.innerHeight, 30);
 
   strokeWeight(3);
   stroke('black');
@@ -308,21 +309,26 @@ function endStroke() {
 
 // mouseDragged runs on touch on mobile, so long as touchMoved is not defined
 function mouseDragged() {
-  if (currentMode == Modes.DRAW) {
-    // add the first point to the stroke if not dragged yet
-    // only useful for mouseDrag, not required for touch 
-    if (currentStroke.length == 0) {
-      currentStroke.push({ x: pmouseX, y: pmouseY });
-    }
-
+  if (currentMode == Modes.DRAW && pointerLocationIsValid()) {
     line(pmouseX, pmouseY, mouseX, mouseY);
     currentStroke.push({ x: mouseX, y: mouseY });
   }
 }
 
+function pointerLocationIsValid() {
+  let d = dist(pmouseX, pmouseY, mouseX, mouseY);
+  if (d > 100 ||  mouseY > (window.innerHeight - buttonDeadZoneHeight)){
+    return false;
+  } else {
+    return true;
+  }
+}
+
 function undo() {
+  // this isn't working because we keep registering strokes underneath the buttons, I thnk 
   if (strokeList.length > 0) {
-    strokeList.pop();
+    console.log(strokeList.pop());
+    console.log(strokeList.length);
     renderBackground();
     drawStrokes(strokeList);
   }
