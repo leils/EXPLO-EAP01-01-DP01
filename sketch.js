@@ -4,7 +4,10 @@ const imgPathList = [
   "assets/p1.jpg", 
   "assets/p2.jpg", 
   "assets/p3.jpg",
-  "assets/p4.jpg"
+  "assets/p4.jpg",
+  "assets/p5.jpg",
+  "assets/p7.jpg",
+  "assets/p8.jpg"
 ]
 let loadedImages = [];
 let currentImageIndex = 0;
