@@ -1,5 +1,6 @@
 [
   {
+    "imgName":"tree.jpg",
     "imgIndex": 0,
     "colorStr": "red",
     "strokes": [
@@ -926,6 +927,7 @@
     ]
   },
   {
+    "imgName": "mountain.jpg",
     "imgIndex": 1,
     "colorStr": "blue",
     "strokes": [
@@ -1580,6 +1582,7 @@
     ]
   },
   {
+    "imgName": "burl.jpg",
     "imgIndex": 2,
     "colorStr": "violet",
     "strokes": [
@@ -3146,6 +3149,7 @@
     ]
   },
   {
+    "imgName": "house.jpg",
     "imgIndex": 3,
     "colorStr": "yellow",
     "strokes": [
@@ -5058,6 +5062,7 @@
     ]
   },
   {
+    "imgName": "mountain.jpg",
     "imgIndex": 1,
     "colorStr": "red",
     "strokes": [
@@ -6936,6 +6941,7 @@
     ]
   },
   {
+    "imgName": "house.jpg",
     "imgIndex": 3,
     "colorStr": "blue",
     "strokes": [
@@ -8524,6 +8530,7 @@
     ]
   },
   {
+    "imgName": "tree.jpg",
     "imgIndex": 0,
     "colorStr": "red",
     "strokes": [
@@ -8850,6 +8857,7 @@
     ]
   },
   {
+    "imgName": "tree.jpg",
     "imgIndex": 0,
     "colorStr": "blue",
     "strokes": [
@@ -9326,6 +9334,7 @@
     ]
   },
   {
+    "imgName": "mountain.jpg",
     "imgIndex": 1,
     "colorStr": "violet",
     "strokes": [
