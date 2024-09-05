@@ -1,13 +1,23 @@
 /*--------------------- Image variables -------------------------*/
 // Asset order matters; index is used to create relation with drawings 
+class imageStruct {
+  constructor(imgName, path) {
+    this.name = imgName;
+    this.path = path;
+    this.loadedImage;
+  }
+}
+
+const imgPathBase = "assets/";
+
 const imgPathList = [
-  "assets/p1.jpg", 
-  "assets/p2.jpg", 
-  "assets/p3.jpg",
-  "assets/p4.jpg",
-  "assets/p5.jpg",
-  "assets/p7.jpg",
-  "assets/p8.jpg"
+  "tree.jpg", 
+  "mountain.jpg", 
+  "burl.jpg",
+  "house.jpg",
+  "sandstone.jpg",
+  "boulders.jpg",
+  "singleboulder.jpg"
 ]
 let loadedImages = [];
 let currentImageIndex = 0;
@@ -32,7 +42,7 @@ const setStrokeWeight = 10;
 const colorList = ["red", "blue", "violet", "yellow"];
 let currentColorIndex = 0;
 
-/* There are two modes; drawing mode, and showing mode 
+/* There are three modes; draw mode, submit mode, and show mode 
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
 const Modes = Object.freeze({
@@ -78,7 +88,7 @@ function toggleMode() {
 
 function showModeSetup() {
   renderBackground();
-  drawingsForCurrentImage = drawingList.filter(d => d.imgIndex == currentImageIndex);
+  drawingsForCurrentImage = drawingList.filter(d => d.imgName == loadedImages[currentImageIndex].name);
   currentImageDrawingIndex = 0;
   drawingOpacity = 0;
   drawingColor = color(drawingsForCurrentImage[currentImageDrawingIndex].colorStr);
@@ -138,7 +148,8 @@ const buttonInfo = [
  * {Array.Array{x:number, y:number}} drawing.strokes
 */ 
 class Drawing {
-  constructor(imgIndex, colorStr, strokes) {
+  constructor(imgName, imgIndex, colorStr, strokes) {
+    this.imgName = imgName;
     this.imgIndex = imgIndex;
     this.colorStr = colorStr;
     this.strokes = strokes;
@@ -148,7 +159,12 @@ class Drawing {
 /*--------------------- Setup -------------------------*/
 function preload() {
   for (path of imgPathList) {
-    loadedImages.push(loadImage(path));
+    let i = new imageStruct(path, imgPathBase + path);
+    i.loadedImage = loadImage(i.path);
+    console.log(i);
+
+    loadedImages.push(i);
+    // loadedImages.push(loadImage(path));
   }
 
   fetchJSONDrawings();
@@ -221,7 +237,7 @@ function buttonInit() {
 }
 
 function drawPrompt() {
-  // TODO incorporate submit mode into promp drawing for clarity
+  // TODO incorporate submit mode into prompt drawing for clarity
   push();
   fill("black");
   noStroke();
@@ -241,7 +257,7 @@ function drawPrompt() {
 
 // ------------------- Draw Functions ----------------//
 function renderBackground() {
-  image(loadedImages[currentImageIndex], 0, 0, window.innerWidth, window.innerHeight);
+  image(loadedImages[currentImageIndex].loadedImage, 0, 0, window.innerWidth, window.innerHeight);
 }
 
 /**
@@ -328,7 +344,6 @@ function pointerLocationIsValid() {
 }
 
 function undo() {
-  // this isn't working because we keep registering strokes underneath the buttons, I thnk 
   if (strokeList.length > 0) {
     console.log(strokeList.pop());
     console.log(strokeList.length);
@@ -345,7 +360,7 @@ function resetCanvas() {
 
 function submitDrawing() {
   if (strokeList.length > 0) {
-    let d = new Drawing(currentImageIndex, colorList[currentColorIndex], strokeList);
+    let d = new Drawing(loadedImages[currentImageIndex].name, currentImageIndex, colorList[currentColorIndex], strokeList);
     drawingList.push(d);
 
     flashOpacity = 255;
