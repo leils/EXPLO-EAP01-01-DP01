@@ -12,11 +12,11 @@ const imgPathBase = "assets/";
 
 const imgPathList = [
   "tree.jpg", 
+  "sandstone.jpg",
   "mountain.jpg", 
   "burl.jpg",
-  "house.jpg",
-  "sandstone.jpg",
   "boulders.jpg",
+  "house.jpg",
   "singleboulder.jpg"
 ]
 let loadedImages = [];
@@ -39,7 +39,7 @@ let strokeList = [];
 let currentStroke = [];
 
 const setStrokeWeight = 10;
-const colorList = ["red", "blue", "violet", "yellow"];
+const colorList = ["aqua", "red", "lime", "violet", "yellow"];
 let currentColorIndex = 0;
 
 /* There are three modes; draw mode, submit mode, and show mode 
