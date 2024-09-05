@@ -42,7 +42,7 @@ const setStrokeWeight = 10;
 const colorList = ["red", "blue", "violet", "yellow"];
 let currentColorIndex = 0;
 
-/* There are two modes; drawing mode, and showing mode 
+/* There are three modes; draw mode, submit mode, and show mode 
  * Drawing + drawing IO, image navigation, only available in drawing mode 
  */ 
 const Modes = Object.freeze({
@@ -237,7 +237,7 @@ function buttonInit() {
 }
 
 function drawPrompt() {
-  // TODO incorporate submit mode into promp drawing for clarity
+  // TODO incorporate submit mode into prompt drawing for clarity
   push();
   fill("black");
   noStroke();
@@ -344,7 +344,6 @@ function pointerLocationIsValid() {
 }
 
 function undo() {
-  // this isn't working because we keep registering strokes underneath the buttons, I thnk 
   if (strokeList.length > 0) {
     console.log(strokeList.pop());
     console.log(strokeList.length);
