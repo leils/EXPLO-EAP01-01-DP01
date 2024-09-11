@@ -24,7 +24,7 @@ let currentImageIndex = 0;
 let buttonHeight;
 let promptTextSize = 50; //Gets rewritten based on window width 
 const drawPromptText = "Do you see something in this image? Draw it!";
-const showPromptText =  "Did they see what you saw? \nTap the screen to keep drawing!";
+const showPromptText =  "Did they see what you saw? \nTap the screen for a new image.";
 const afterSubmitText = "Great! Let's see what other people drew.";
 
 /*--------------------- Drawings variables -------------------------*/
@@ -76,7 +76,7 @@ function toggleMode() {
     }, 30000)
 
   } else if (currentMode == Modes.SHOW) { // show mode -> draw mode 
-    resetCanvas();
+    nextImage(); // Move to next image after show
     for (b of allButtons) { b.show(); } // show all buttons
     currentMode = Modes.DRAW
 
